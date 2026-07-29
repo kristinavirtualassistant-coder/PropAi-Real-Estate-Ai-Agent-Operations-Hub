@@ -1,0 +1,6 @@
+{
+  "name": "PropAI - Real Estate AI Agent Operations Hub",
+  "description": "Autonomous AI agent platform for real estate wholesalers and property managers to automate cold outreach, deal qualification, and 24/7 maintenance triage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
