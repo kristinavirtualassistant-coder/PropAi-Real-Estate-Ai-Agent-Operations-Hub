@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TargetNiche, WholesalerLead, MaintenanceTicket, PreferredContractor, AgentConfig, CampaignStats, PropertyManagerStats } from './types';
+import { TargetNiche, WholesalerLead, MaintenanceTicket, PreferredContractor, AgentConfig, CampaignStats, PropertyManagerStats, BrandConfig, NicheModule, FeatureRequestItem, NicheBuildRequestItem } from './types';
 import {
   INITIAL_WHOLESALER_LEADS,
   INITIAL_MAINTENANCE_TICKETS,
@@ -7,28 +7,43 @@ import {
   DEFAULT_WHOLESALER_CONFIG,
   DEFAULT_MAINTENANCE_CONFIG,
   INITIAL_WHOLESALER_STATS,
-  INITIAL_PM_STATS
+  INITIAL_PM_STATS,
+  DEFAULT_BRAND_CONFIG,
+  INITIAL_NICHE_MODULES,
+  INITIAL_FEATURE_REQUESTS,
+  INITIAL_NICHE_BUILD_REQUESTS
 } from './data/mockData';
 import { Navbar } from './components/Navbar';
 import { WholesalerDashboard } from './components/WholesalerDashboard';
 import { MaintenanceDashboard } from './components/MaintenanceDashboard';
+import { NicheCatalogDashboard } from './components/NicheCatalogDashboard';
 import { LiveStudioModal } from './components/LiveStudioModal';
 import { ConfigModal } from './components/ConfigModal';
 import { PricingModal } from './components/PricingModal';
 import { ImportLeadsModal } from './components/ImportLeadsModal';
-import { GeminiIntelligenceModal } from './components/GeminiIntelligenceModal';
-import { ActivityLogs } from './components/ActivityLogs';
-import { X } from 'lucide-react';
+import { BrandModal } from './components/BrandModal';
+import { AddNicheModal } from './components/AddNicheModal';
+import { FeatureRequestModal } from './components/FeatureRequestModal';
+import { GeminiIntelligenceDrawer } from './components/GeminiIntelligenceDrawer';
+import { auth, onAuthStateChanged, User } from './lib/firebase';
 
 export default function App() {
-  const [activeNiche, setActiveNiche] = useState<TargetNiche>('wholesaler');
+  // Firebase User Auth State
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  // Page 1: Property Managers, Page 2: Wholesalers, etc.
+  const [activeNiche, setActiveNiche] = useState<TargetNiche>('property_manager');
+  const [nicheModules, setNicheModules] = useState<NicheModule[]>(INITIAL_NICHE_MODULES);
   
   // Data States
   const [leads, setLeads] = useState<WholesalerLead[]>(INITIAL_WHOLESALER_LEADS);
   const [tickets, setTickets] = useState<MaintenanceTicket[]>(INITIAL_MAINTENANCE_TICKETS);
   const [contractors] = useState<PreferredContractor[]>(INITIAL_CONTRACTORS);
+  const [featureRequests, setFeatureRequests] = useState<FeatureRequestItem[]>(INITIAL_FEATURE_REQUESTS);
+  const [nicheBuildRequests, setNicheBuildRequests] = useState<NicheBuildRequestItem[]>(INITIAL_NICHE_BUILD_REQUESTS);
   
-  // Config States
+  // Brand & Config States
+  const [brandConfig, setBrandConfig] = useState<BrandConfig>(DEFAULT_BRAND_CONFIG);
   const [wholesalerConfig, setWholesalerConfig] = useState<AgentConfig>(DEFAULT_WHOLESALER_CONFIG);
   const [maintenanceConfig, setMaintenanceConfig] = useState<AgentConfig>(DEFAULT_MAINTENANCE_CONFIG);
   
@@ -38,13 +53,23 @@ export default function App() {
 
   // Modals & Flags
   const [isLiveStudioOpen, setIsLiveStudioOpen] = useState<boolean>(false);
-  const [isGeminiIntelligenceOpen, setIsGeminiIntelligenceOpen] = useState<boolean>(false);
-  const [isActivityLogsOpen, setIsActivityLogsOpen] = useState<boolean>(false);
   const [isConfigOpen, setIsConfigOpen] = useState<boolean>(false);
   const [isPricingOpen, setIsPricingOpen] = useState<boolean>(false);
   const [isImportOpen, setIsImportOpen] = useState<boolean>(false);
+  const [isBrandOpen, setIsBrandOpen] = useState<boolean>(false);
+  const [isAddNicheOpen, setIsAddNicheOpen] = useState<boolean>(false);
+  const [isFeatureRequestOpen, setIsFeatureRequestOpen] = useState<boolean>(false);
+  const [isGeminiDrawerOpen, setIsGeminiDrawerOpen] = useState<boolean>(false);
   const [geminiConnected, setGeminiConnected] = useState<boolean>(true);
   const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
+
+  // Listen for Firebase Auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Selected items for Studio
   const [selectedLeadForSim, setSelectedLeadForSim] = useState<WholesalerLead | null>(leads[0] || null);
@@ -126,6 +151,10 @@ export default function App() {
     }
   };
 
+  const handleTogglePriorityOverride = (leadId: string) => {
+    setLeads(prev => prev.map(l => l.id === leadId ? { ...l, isPriorityOverride: !l.isPriorityOverride } : l));
+  };
+
   // 2. Maintenance Message Sender (Target B)
   const handleSendMessageToTenant = async (ticketId: string, text: string) => {
     const targetTicket = tickets.find(t => t.id === ticketId);
@@ -189,56 +218,34 @@ export default function App() {
     }
   };
 
+  const activeNicheModule = nicheModules.find(m => m.id === activeNiche) || nicheModules[0];
+
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 font-sans selection:bg-indigo-500 selection:text-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-500 selection:text-white flex flex-col">
       
       {/* Navigation Header */}
       <Navbar
         activeNiche={activeNiche}
         setActiveNiche={setActiveNiche}
+        nicheModules={nicheModules}
         onOpenLiveStudio={() => setIsLiveStudioOpen(true)}
-        onOpenGeminiIntelligence={() => setIsGeminiIntelligenceOpen(true)}
         onOpenConfig={() => setIsConfigOpen(true)}
         onOpenPricing={() => setIsPricingOpen(true)}
         onOpenImport={() => setIsImportOpen(true)}
-        onOpenActivityLogs={() => setIsActivityLogsOpen(true)}
+        onOpenBrand={() => setIsBrandOpen(true)}
+        onOpenAddNicheModal={() => setIsAddNicheOpen(true)}
+        onOpenFeatureRequestModal={() => setIsFeatureRequestOpen(true)}
+        onOpenGeminiDrawer={() => setIsGeminiDrawerOpen(true)}
+        brandConfig={brandConfig}
         geminiConnected={geminiConnected}
+        currentUser={currentUser}
       />
 
       {/* Main Workspace Canvas */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
-        {activeNiche === 'wholesaler' ? (
-          <WholesalerDashboard
-            leads={leads}
-            stats={wholesalerStats}
-            onSelectLeadForSim={(lead) => {
-              setSelectedLeadForSim(lead);
-              setIsLiveStudioOpen(true);
-            }}
-            onAddNewLead={(newLead) => {
-              const fullLead: WholesalerLead = {
-                id: `lead-${Date.now()}`,
-                propertyAddress: newLead.propertyAddress || '123 Main St',
-                cityStateZip: newLead.cityStateZip || 'Dallas, TX',
-                ownerName: newLead.ownerName || 'Property Owner',
-                phone: newLead.phone || '(555) 019-2831',
-                distressType: newLead.distressType || 'Tax Delinquent',
-                estimatedValue: newLead.estimatedValue || 250000,
-                motivationScore: 5,
-                status: 'new',
-                conversation: []
-              };
-              setLeads(prev => [fullLead, ...prev]);
-              setSelectedLeadForSim(fullLead);
-            }}
-            onUpdateLeadStatus={(leadId, status) => {
-              setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status } : l));
-            }}
-            onSendMessageToLead={handleSendMessageToLead}
-            isAiThinking={isAiThinking}
-          />
-        ) : (
+        {/* Page 1: Property Managers */}
+        {activeNiche === 'property_manager' ? (
           <MaintenanceDashboard
             tickets={tickets}
             stats={pmStats}
@@ -268,46 +275,132 @@ export default function App() {
             }}
             isAiThinking={isAiThinking}
           />
+        ) : activeNiche === 'wholesaler' ? (
+          /* Page 2: Wholesalers */
+          <WholesalerDashboard
+            leads={leads}
+            stats={wholesalerStats}
+            onSelectLeadForSim={(lead) => {
+              setSelectedLeadForSim(lead);
+              setIsLiveStudioOpen(true);
+            }}
+            onAddNewLead={(newLead) => {
+              const fullLead: WholesalerLead = {
+                id: `lead-${Date.now()}`,
+                propertyAddress: newLead.propertyAddress || '123 Main St',
+                cityStateZip: newLead.cityStateZip || 'Dallas, TX',
+                ownerName: newLead.ownerName || 'Property Owner',
+                phone: newLead.phone || '(555) 019-2831',
+                distressType: newLead.distressType || 'Tax Delinquent',
+                estimatedValue: newLead.estimatedValue || 250000,
+                motivationScore: 5,
+                status: 'new',
+                conversation: []
+              };
+              setLeads(prev => [fullLead, ...prev]);
+              setSelectedLeadForSim(fullLead);
+            }}
+            onUpdateLeadStatus={(leadId, status) => {
+              setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status } : l));
+            }}
+            onSendMessageToLead={handleSendMessageToLead}
+            onTogglePriorityOverride={handleTogglePriorityOverride}
+            isAiThinking={isAiThinking}
+          />
+        ) : (
+          /* Page 3+: Extensible Niche Modules */
+          <NicheCatalogDashboard
+            nicheModule={activeNicheModule}
+            brandConfig={brandConfig}
+            onOpenLiveStudio={() => setIsLiveStudioOpen(true)}
+            onOpenAddNicheModal={() => setIsAddNicheOpen(true)}
+          />
         )}
-
-        {/* Dedicated Activity Telemetry Logs Dashboard Section */}
-        <section id="activity-logs-section" className="pt-4 border-t border-slate-300/60 dark:border-slate-800">
-          <ActivityLogs />
-        </section>
 
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-900 py-3.5 text-center text-xs text-slate-400 font-medium">
-        PropAI Operations Hub • Real Estate Wholesaler Acquisitions & 24/7 Tenant Maintenance Engine • Powered by Gemini 3.6 Flash
+      <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-600 flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto px-4 gap-2">
+        <div>
+          <span className="font-bold text-slate-800">{brandConfig.companyName}</span> • {brandConfig.tagline}
+        </div>
+        <div className="text-[11px] font-mono text-indigo-600 font-semibold">
+          {brandConfig.watermarkText} ({brandConfig.customDomain})
+        </div>
       </footer>
 
       {/* Modals */}
-      {isActivityLogsOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-fadeIn">
-          <div className="relative w-full max-w-5xl my-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
-            <button
-              onClick={() => setIsActivityLogsOpen(false)}
-              className="absolute top-4 right-4 z-10 p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <ActivityLogs isEmbedded={true} />
-          </div>
-        </div>
-      )}
-
-      <GeminiIntelligenceModal
-        isOpen={isGeminiIntelligenceOpen}
-        onClose={() => setIsGeminiIntelligenceOpen(false)}
-      />
-
       <LiveStudioModal
         isOpen={isLiveStudioOpen}
         onClose={() => setIsLiveStudioOpen(false)}
         activeNiche={activeNiche}
         selectedLead={selectedLeadForSim}
         selectedTicket={selectedTicketForSim}
+        brandConfig={brandConfig}
+      />
+
+      <BrandModal
+        isOpen={isBrandOpen}
+        onClose={() => setIsBrandOpen(false)}
+        brandConfig={brandConfig}
+        onSaveBrand={(newBrand) => setBrandConfig(newBrand)}
+      />
+
+      <AddNicheModal
+        isOpen={isAddNicheOpen}
+        onClose={() => setIsAddNicheOpen(false)}
+        existingCount={nicheModules.length}
+        onAddNiche={(newMod) => {
+          setNicheModules(prev => [...prev, newMod]);
+          setActiveNiche(newMod.id);
+        }}
+        onSubmitNicheBuildRequest={(newBuildReq) => {
+          const item: NicheBuildRequestItem = {
+            ...newBuildReq,
+            id: `nbr-${Date.now()}`,
+            status: 'Received',
+            submittedAt: 'Just now'
+          };
+          setNicheBuildRequests(prev => [item, ...prev]);
+        }}
+        onOpenFeatureRequestModal={() => {
+          setIsAddNicheOpen(false);
+          setIsFeatureRequestOpen(true);
+        }}
+      />
+
+      <FeatureRequestModal
+        isOpen={isFeatureRequestOpen}
+        onClose={() => setIsFeatureRequestOpen(false)}
+        featureRequests={featureRequests}
+        onSubmitRequest={(req) => {
+          const newItem: FeatureRequestItem = {
+            ...req,
+            id: `fr-${Date.now()}`,
+            votes: 1,
+            userVoted: true,
+            status: 'Under Review',
+            createdAt: 'Just now'
+          };
+          setFeatureRequests(prev => [newItem, ...prev]);
+        }}
+        onVoteRequest={(id) => {
+          setFeatureRequests(prev => prev.map(item => {
+            if (item.id === id) {
+              const userVoted = !item.userVoted;
+              return {
+                ...item,
+                userVoted,
+                votes: userVoted ? item.votes + 1 : item.votes - 1
+              };
+            }
+            return item;
+          }));
+        }}
+        onOpenAddNicheModal={() => {
+          setIsFeatureRequestOpen(false);
+          setIsAddNicheOpen(true);
+        }}
       />
 
       <ConfigModal
@@ -339,6 +432,11 @@ export default function App() {
         onImportBulkTickets={(newTickets) => {
           setTickets(prev => [...newTickets, ...prev]);
         }}
+      />
+
+      <GeminiIntelligenceDrawer
+        isOpen={isGeminiDrawerOpen}
+        onClose={() => setIsGeminiDrawerOpen(false)}
       />
 
     </div>

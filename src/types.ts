@@ -1,4 +1,18 @@
-export type TargetNiche = 'wholesaler' | 'property_manager';
+export type TargetNiche = 'property_manager' | 'wholesaler' | 'real_estate_agent' | 'short_term_rental' | 'solar_sales' | string;
+
+export interface NicheModule {
+  id: string;
+  pageNumber: number;
+  name: string;
+  badge: string;
+  description: string;
+  iconName: 'wrench' | 'building' | 'home' | 'key' | 'sun' | 'sparkles' | 'briefcase';
+  colorTheme: 'emerald' | 'indigo' | 'violet' | 'amber' | 'cyan' | 'rose';
+  stats: { label: string; value: string; detail: string }[];
+  sampleWorkflow: { step: string; title: string; desc: string }[];
+  voiceAgentPrompt: string;
+  isCustom?: boolean;
+}
 
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'offer_made' | 'under_contract' | 'nurture' | 'unmotivated';
 
@@ -31,6 +45,7 @@ export interface WholesalerLead {
   notes?: string;
   conversation: ChatMessage[];
   scheduledCallDate?: string;
+  isPriorityOverride?: boolean;
 }
 
 export interface MaintenanceTicket {
@@ -88,6 +103,20 @@ export interface CampaignStats {
   estimatedPipelineValue: number;
 }
 
+export interface BrandConfig {
+  companyName: string;
+  tagline: string;
+  primaryColor: 'indigo' | 'emerald' | 'violet' | 'amber' | 'rose' | 'cyan';
+  logoIcon: 'bot' | 'building' | 'home' | 'sparkles' | 'shield' | 'zap';
+  customDomain: string;
+  customLogoUrl?: string;
+  agentPhoneName: string;
+  whiteLabelEnabled: boolean;
+  watermarkText: string;
+  phoneDisplayNumber: string;
+  smsSignature: string;
+}
+
 export interface PropertyManagerStats {
   totalUnitsManaged: number;
   activeTicketsCount: number;
@@ -97,18 +126,25 @@ export interface PropertyManagerStats {
   estimatedHoursSavedMonthly: number;
 }
 
-export interface ActivityLogEntry {
+export interface FeatureRequestItem {
   id: string;
-  timestamp: string;
-  service: 'Vapi Telephony' | 'Retell AI' | 'Gemini 3.6 Flash' | 'Gemini 3.5 Flash' | 'Gemini 3.1 Pro' | 'Gemini Live API' | 'Gemini TTS';
-  endpoint: string;
-  method: string;
-  status: '200 OK' | '201 Created' | '400 Bad Request' | '500 Server Error' | 'Pending';
-  latencyMs: number;
-  requestPayload: any;
-  responsePayload: any;
-  headers?: Record<string, string>;
-  modelUsed?: string;
-  notes?: string;
+  title: string;
+  category: 'Integration' | 'UI / Workflow' | 'Reporting' | 'Automation' | 'Mobile App' | 'Telephony';
+  description: string;
+  votes: number;
+  userVoted?: boolean;
+  status: 'Under Review' | 'Planned' | 'In Development' | 'Completed';
+  createdAt: string;
+  authorEmail?: string;
 }
 
+export interface NicheBuildRequestItem {
+  id: string;
+  industryName: string;
+  targetAudience: string;
+  keyWorkflows: string;
+  specialRequirements: string;
+  contactEmail: string;
+  status: 'Received' | 'Scoped' | 'In Build' | 'Ready for Preview';
+  submittedAt: string;
+}

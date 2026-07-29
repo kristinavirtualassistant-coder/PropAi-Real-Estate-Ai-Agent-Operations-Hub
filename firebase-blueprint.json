@@ -1,0 +1,42 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Lead",
+      "description": "Off-market real estate acquisition seller lead",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerName": { "type": "string" },
+        "propertyAddress": { "type": "string" },
+        "phone": { "type": "string" },
+        "status": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["ownerName", "propertyAddress"]
+    },
+    "MaintenanceTicket": {
+      "title": "MaintenanceTicket",
+      "description": "Property management 24/7 maintenance ticket",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantName": { "type": "string" },
+        "propertyAddress": { "type": "string" },
+        "issue": { "type": "string" },
+        "urgency": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["tenantName", "propertyAddress", "issue"]
+    }
+  },
+  "firestore": {
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Collection of off-market seller leads"
+    },
+    "/maintenance_tickets/{ticketId}": {
+      "schema": "MaintenanceTicket",
+      "description": "Collection of maintenance issues and tickets"
+    }
+  }
+}

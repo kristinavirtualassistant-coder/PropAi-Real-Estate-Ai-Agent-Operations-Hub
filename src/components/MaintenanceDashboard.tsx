@@ -36,48 +36,49 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
   const getSeverityBadge = (sev: TicketSeverity) => {
     switch (sev) {
       case 'emergency':
-        return <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1"><ShieldAlert className="w-3 h-3 text-rose-600 animate-pulse" /> 2:00 AM EMERGENCY</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200 flex items-center gap-1 animate-pulse"><ShieldAlert className="w-3 h-3 text-rose-600" /> 2:00 AM EMERGENCY</span>;
       case 'high':
-        return <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">High Priority</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">High Priority</span>;
       case 'medium':
-        return <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-300">Standard</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">Standard</span>;
       default:
-        return <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300">Low</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">Low</span>;
     }
   };
 
   const getStatusBadge = (st: TicketStatus) => {
     switch (st) {
       case 'contractor_dispatched':
-        return <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1"><HardHat className="w-3 h-3 text-emerald-700" /> Contractor Dispatched</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1"><HardHat className="w-3 h-3 text-emerald-700" /> Contractor Dispatched</span>;
       case 'triaged':
-        return <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-300">Triaged</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">Triaged</span>;
       case 'completed':
-        return <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-300">Completed</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">Completed</span>;
       default:
-        return <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-300">Submitted</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">Submitted</span>;
     }
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       
       {/* Target Banner */}
-      <div className="bg-slate-900 rounded-xl p-5 border border-slate-800 shadow-sm relative overflow-hidden text-white">
+      <div className="bg-gradient-to-r from-emerald-50 via-white to-teal-50 rounded-2xl p-6 border border-emerald-200 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[11px] font-bold border border-emerald-500/30">
-                TARGET B: 24/7 PROPERTY OPERATIONS
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 font-mono text-xs border border-emerald-200 font-bold">
+                24/7 PROPERTY OPERATIONS
               </span>
-              <span className="text-xs text-slate-400 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-teal-400" /> Prevents Hiring 3 Extra Human Coordinators
+              <span className="text-xs text-slate-600 flex items-center gap-1 font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-teal-600" /> Prevents Hiring 3 Extra Human Coordinators
               </span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
               24/7 Autonomous Maintenance & Tenant Coordinator
             </h1>
-            <p className="text-xs text-slate-300 max-w-2xl mt-1 leading-relaxed">
+            <p className="text-sm text-slate-600 max-w-2xl mt-1">
               Handles middle-of-the-night tenant emergency calls, diagnoses issue severity with Gemini AI, guides tenant through troubleshooting, and auto-dispatches preferred local contractors.
             </p>
           </div>
@@ -85,7 +86,7 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => setShowAddTicketModal(true)}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-sm transition-all"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all"
             >
               <Plus className="w-4 h-4" />
               <span>Log Tenant Ticket</span>
@@ -95,68 +96,68 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
       </div>
 
       {/* Operational KPI Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         
-        <div className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
+        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-1 font-semibold">
             <span>Doors Managed</span>
             <Building className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="text-2xl font-bold text-slate-900">{stats.totalUnitsManaged}</div>
-          <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">Across 18 Properties</p>
+          <div className="text-2xl font-extrabold text-slate-900">{stats.totalUnitsManaged}</div>
+          <p className="text-[11px] text-emerald-600 font-bold mt-1">Across 18 Properties</p>
         </div>
 
-        <div className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
+        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-1 font-semibold">
             <span>24/7 Avg Triage Speed</span>
             <Clock className="w-4 h-4 text-teal-600" />
           </div>
-          <div className="text-2xl font-bold text-teal-700">{stats.avgTriageTimeMinutes} mins</div>
-          <p className="text-[11px] text-slate-500 mt-0.5">Instant Voice/SMS Triage</p>
+          <div className="text-2xl font-extrabold text-teal-700">{stats.avgTriageTimeMinutes} mins</div>
+          <p className="text-[11px] text-slate-500 mt-1 font-medium">Instant Voice/SMS Triage</p>
         </div>
 
-        <div className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
+        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-1 font-semibold">
             <span>24h Emergencies Resolved</span>
             <ShieldAlert className="w-4 h-4 text-rose-600" />
           </div>
-          <div className="text-2xl font-bold text-rose-600">{stats.emergencyResolved24h}</div>
-          <p className="text-[11px] text-rose-700 font-semibold mt-0.5">Auto-Dispatched HVAC/Plumbing</p>
+          <div className="text-2xl font-extrabold text-rose-600">{stats.emergencyResolved24h}</div>
+          <p className="text-[11px] text-rose-700 font-semibold mt-1">Auto-Dispatched HVAC/Plumbing</p>
         </div>
 
-        <div className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
+        <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-1 font-semibold">
             <span>Tenant Satisfaction</span>
             <UserCheck className="w-4 h-4 text-amber-500" />
           </div>
-          <div className="text-2xl font-bold text-amber-600">{stats.tenantSatisfactionScore} / 5.0</div>
-          <p className="text-[11px] text-slate-500 mt-0.5">From 140+ tenant ratings</p>
+          <div className="text-2xl font-extrabold text-amber-700">{stats.tenantSatisfactionScore} / 5.0</div>
+          <p className="text-[11px] text-slate-500 mt-1">From 140+ tenant ratings</p>
         </div>
 
-        <div className="bg-teal-900 text-white rounded-xl p-3.5 border border-teal-800 shadow-sm col-span-2 lg:col-span-1">
-          <div className="flex items-center justify-between text-xs text-teal-200 font-semibold mb-1">
+        <div className="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-xl p-4 border border-teal-200 shadow-sm col-span-2 lg:col-span-1">
+          <div className="flex items-center justify-between text-xs text-teal-900 font-bold mb-1">
             <span>Hours Saved Monthly</span>
-            <Wrench className="w-4 h-4 text-emerald-400" />
+            <Wrench className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="text-2xl font-bold text-emerald-400">145 Hours</div>
-          <p className="text-[11px] text-teal-200 mt-0.5">Replaces night shift VA team</p>
+          <div className="text-2xl font-extrabold text-emerald-700">145 Hours</div>
+          <p className="text-[11px] text-slate-600 mt-1 font-medium">Replaces night shift VA team</p>
         </div>
 
       </div>
 
       {/* Morning Briefing Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm flex items-start gap-3 text-white">
-        <div className="p-2 rounded-lg bg-teal-500/20 text-teal-300 border border-teal-500/30 shrink-0">
-          <FileText className="w-4 h-4" />
+      <div className="bg-white border border-teal-200 rounded-2xl p-4 shadow-sm flex items-start gap-3">
+        <div className="p-2.5 rounded-xl bg-teal-100 text-teal-800 border border-teal-200 shrink-0">
+          <FileText className="w-5 h-5" />
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-teal-300 tracking-wider">
+            <span className="text-xs font-bold text-teal-900 tracking-wider">
               AUTOMATED MORNING MANAGER BRIEFING (GENERATED 6:00 AM)
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">24/7 AI System Log</span>
+            <span className="text-[10px] text-slate-500 font-medium">24/7 AI System Log</span>
           </div>
-          <p className="text-xs text-slate-200 mt-1 font-mono leading-relaxed">
+          <p className="text-xs text-slate-700 mt-1 font-mono leading-relaxed font-medium">
             {"Overnight summary: 2:14 AM - Complete AC Failure reported by Jessica Taylor (742 Evergreen Terr, Unit 4B). AI auto-triaged as Emergency (outside temp > 92°F). AirPro Emergency HVAC dispatched via SMS. Tenant guided through circuit breaker safety check. ETA for repair: 7:45 AM today."}
           </p>
         </div>
@@ -166,10 +167,10 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
         <button
           onClick={() => setActiveTab('kanban')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'kanban'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
+              ? 'bg-teal-600 text-white shadow-sm'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
           }`}
         >
           Work Orders & 24/7 Triage
@@ -177,10 +178,10 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
 
         <button
           onClick={() => setActiveTab('contractors')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'contractors'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
+              ? 'bg-teal-600 text-white shadow-sm'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
           }`}
         >
           Preferred Contractor Auto-Dispatch ({contractors.length})
@@ -189,25 +190,25 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
 
       {/* Tab 1: Work Orders Workspace */}
       {activeTab === 'kanban' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Left Column: Tickets List (5 cols) */}
-          <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 shadow-sm p-3.5 flex flex-col h-[640px]">
-            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+          <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col h-[640px]">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
               Active Maintenance Work Orders ({tickets.length})
             </h3>
 
-            <div className="overflow-y-auto space-y-2 pr-1 flex-1">
+            <div className="overflow-y-auto space-y-2.5 pr-1 flex-1">
               {tickets.map(ticket => {
                 const isSelected = activeTicket?.id === ticket.id;
                 return (
                   <div
                     key={ticket.id}
                     onClick={() => setActiveTicket(ticket)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-teal-50/80 border-teal-400 shadow-sm'
-                        : 'bg-slate-50/60 border-slate-200 hover:border-slate-300 hover:bg-slate-100/60'
+                        ? 'bg-teal-50 border-teal-400 shadow-sm'
+                        : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -223,8 +224,8 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
                       <div className="shrink-0">{getSeverityBadge(ticket.severity)}</div>
                     </div>
 
-                    <div className="mt-2.5 flex items-center justify-between text-[11px] pt-2 border-t border-slate-800/60">
-                      <div className="text-slate-400">{ticket.tenantName} ({ticket.propertyAddress})</div>
+                    <div className="mt-2.5 flex items-center justify-between text-[11px] pt-2 border-t border-slate-200">
+                      <div className="text-slate-500 font-medium">{ticket.tenantName} ({ticket.propertyAddress})</div>
                       <div>{getStatusBadge(ticket.status)}</div>
                     </div>
                   </div>
@@ -234,7 +235,7 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
           </div>
 
           {/* Right Column: Ticket Detail & Live Chat Simulator (7 cols) */}
-          <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col h-[640px]">
+          <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col h-[640px]">
             {activeTicket ? (
               <>
                 {/* Header */}
@@ -245,14 +246,14 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
                       <h2 className="text-sm font-bold text-slate-900">{activeTicket.propertyAddress}, {activeTicket.unit}</h2>
                       {getSeverityBadge(activeTicket.severity)}
                     </div>
-                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Tenant: <span className="text-slate-800 font-bold">{activeTicket.tenantName}</span> ({activeTicket.tenantPhone})
                     </p>
                   </div>
 
                   <button
                     onClick={() => onSelectTicketForSim(activeTicket)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition-colors shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-sm transition-colors"
                   >
                     <PhoneCall className="w-3.5 h-3.5" />
                     <span>Simulate 2:00 AM Tenant Call</span>
@@ -260,16 +261,16 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
                 </div>
 
                 {/* Auto-Dispatch & Troubleshooting Card */}
-                <div className="my-2.5 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-2 shrink-0">
+                <div className="my-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2 shrink-0">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-600 font-bold flex items-center gap-1">
-                      <HardHat className="w-3.5 h-3.5 text-teal-700" /> DISPATCHED CONTRACTOR:
+                      <HardHat className="w-3.5 h-3.5 text-teal-600" /> DISPATCHED CONTRACTOR:
                     </span>
-                    <span className="text-teal-800 font-bold">{activeTicket.contractorAssigned || 'None'}</span>
+                    <span className="text-teal-800 font-extrabold">{activeTicket.contractorAssigned || 'None'}</span>
                   </div>
 
                   {activeTicket.contractorMessage && (
-                    <div className="p-2 rounded bg-white border border-slate-200 text-[11px] text-slate-800 font-mono shadow-xs">
+                    <div className="p-2 rounded bg-white border border-slate-200 text-[11px] text-slate-700 font-mono font-medium">
                       <span className="text-emerald-700 font-bold">AUTOMATED SMS SENT TO CONTRACTOR:</span> "{activeTicket.contractorMessage}"
                     </div>
                   )}
@@ -277,7 +278,7 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
                   {activeTicket.troubleshootingSteps.length > 0 && (
                     <div>
                       <span className="text-slate-600 text-[11px] font-bold block mb-1">AI TROUBLESHOOTING GIVEN TO TENANT:</span>
-                      <ul className="list-disc list-inside text-[11px] text-slate-700 font-medium space-y-0.5">
+                      <ul className="list-disc list-inside text-[11px] text-slate-700 space-y-0.5 font-medium">
                         {activeTicket.troubleshootingSteps.map((step, idx) => (
                           <li key={idx}>{step}</li>
                         ))}
@@ -296,14 +297,14 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
                           key={msg.id}
                           className={`flex flex-col ${isAi ? 'items-start' : 'items-end'}`}
                         >
-                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold mb-0.5 px-1">
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-0.5 px-1 font-medium">
                             <span>{isAi ? 'PropAI Maintenance Assistant' : activeTicket.tenantName}</span>
                             <span>• {msg.timestamp}</span>
                           </div>
-                          <div className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${
+                          <div className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed font-medium ${
                             isAi
-                              ? 'bg-teal-700 text-white shadow-sm rounded-tl-xs font-medium'
-                              : 'bg-white text-slate-800 border border-slate-200 shadow-sm rounded-tr-xs font-medium'
+                              ? 'bg-teal-600 text-white rounded-tl-xs shadow-sm'
+                              : 'bg-white text-slate-800 border border-slate-200 rounded-tr-xs shadow-sm'
                           }`}>
                             {msg.text}
                           </div>
@@ -311,14 +312,14 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
                       );
                     })
                   ) : (
-                    <div className="text-center py-10 text-slate-400 text-xs font-medium">
+                    <div className="text-center py-10 text-slate-500 text-xs font-medium">
                       No call transcript logged yet. Type a tenant emergency message below to test triage!
                     </div>
                   )}
 
                   {isAiThinking && (
-                    <div className="flex items-center gap-2 text-teal-800 text-xs bg-teal-50 p-2.5 rounded-xl border border-teal-200 animate-pulse font-medium">
-                      <Sparkles className="w-3.5 h-3.5 animate-spin text-teal-600" />
+                    <div className="flex items-center gap-2 text-teal-800 text-xs bg-teal-50 p-2.5 rounded-xl border border-teal-200 animate-pulse font-bold">
+                      <Sparkles className="w-3.5 h-3.5 animate-spin" />
                       <span>PropAI Maintenance Engine is diagnosing issue severity & drafting response...</span>
                     </div>
                   )}
@@ -340,7 +341,7 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
                           setTenantMsgInput(emText);
                           await onSendMessageToTenant(activeTicket.id, emText);
                         }}
-                        className="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium border border-slate-300 transition-colors"
+                        className="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 font-medium transition-colors"
                       >
                         "{emText}"
                       </button>
@@ -355,12 +356,12 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
                       value={tenantMsgInput}
                       onChange={e => setTenantMsgInput(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleSendTenantMessage()}
-                      className="flex-1 bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-600"
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 font-medium"
                     />
                     <button
                       onClick={handleSendTenantMessage}
                       disabled={isAiThinking || !tenantMsgInput.trim()}
-                      className="px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shrink-0 shadow-sm"
+                      className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shrink-0 shadow-sm"
                     >
                       <Send className="w-3.5 h-3.5" />
                       <span>Send</span>
@@ -369,7 +370,7 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-center h-full text-slate-400 text-xs font-medium">
+              <div className="flex items-center justify-center h-full text-slate-500 text-xs font-medium">
                 Select a ticket on the left to view triage details and test AI response.
               </div>
             )}
@@ -378,32 +379,32 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
         </div>
       ) : (
         /* Tab 2: Preferred Contractor Directory */
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Preferred Local Contractor Auto-Dispatch Directory</h3>
-            <p className="text-xs text-slate-500 font-medium">
+            <h3 className="text-base font-extrabold text-slate-900">Preferred Local Contractor Auto-Dispatch Directory</h3>
+            <p className="text-xs text-slate-600 mt-1">
               When PropAI diagnoses an Emergency or High Severity issue (e.g. AC failure in heatwave, burst pipe), it automatically dispatches the primary contractor via SMS with address and job details.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {contractors.map(c => (
-              <div key={c.id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start justify-between gap-4">
+              <div key={c.id} className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 font-mono text-xs font-bold border border-teal-300">
+                    <span className="px-2 py-0.5 rounded bg-teal-100 text-teal-800 font-mono text-xs font-bold border border-teal-200">
                       {c.trade}
                     </span>
                     <h4 className="text-sm font-bold text-slate-900">{c.company}</h4>
                   </div>
                   <p className="text-xs text-slate-700 font-medium">Contact: {c.name}</p>
-                  <p className="text-xs text-slate-500">Phone: {c.phone} | Email: {c.email}</p>
+                  <p className="text-xs text-slate-400">Phone: {c.phone} | Email: {c.email}</p>
                 </div>
 
                 <div className="text-right shrink-0">
                   <span className="text-xs text-amber-600 font-bold block">★ {c.rating} / 5.0</span>
-                  <span className={`inline-block mt-2 px-2 py-1 rounded-md text-[10px] font-bold ${
-                    c.autoDispatchUrgent ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-700'
+                  <span className={`inline-block mt-2 px-2 py-1 rounded text-[10px] font-bold ${
+                    c.autoDispatchUrgent ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-200 text-slate-700'
                   }`}>
                     {c.autoDispatchUrgent ? 'Auto-Dispatch ON' : 'Manual Approval'}
                   </span>
@@ -416,10 +417,10 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
 
       {/* Add Ticket Modal */}
       {showAddTicketModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Plus className="w-4 h-4 text-teal-400" /> Log New Tenant Maintenance Ticket
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Plus className="w-4 h-4 text-teal-600" /> Log New Tenant Maintenance Ticket
             </h3>
 
             <form
@@ -444,17 +445,17 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
               className="space-y-3 text-xs"
             >
               <div>
-                <label className="block text-slate-400 mb-1">Property Address</label>
-                <input required name="address" defaultValue="742 Evergreen Terrace" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white" />
+                <label className="block text-slate-700 font-semibold mb-1">Property Address</label>
+                <input required name="address" defaultValue="742 Evergreen Terrace" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 font-medium" />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-slate-400 mb-1">Unit #</label>
-                  <input required name="unit" defaultValue="Unit 2A" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white" />
+                  <label className="block text-slate-700 font-semibold mb-1">Unit #</label>
+                  <input required name="unit" defaultValue="Unit 2A" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 font-medium" />
                 </div>
                 <div>
-                  <label className="block text-slate-400 mb-1">Category</label>
-                  <select name="category" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white">
+                  <label className="block text-slate-700 font-semibold mb-1">Category</label>
+                  <select name="category" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 font-medium">
                     <option value="HVAC">HVAC</option>
                     <option value="Plumbing">Plumbing</option>
                     <option value="Electrical">Electrical</option>
@@ -465,21 +466,21 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-slate-400 mb-1">Tenant Name</label>
-                  <input required name="tenant" defaultValue="Alex Miller" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white" />
+                  <label className="block text-slate-700 font-semibold mb-1">Tenant Name</label>
+                  <input required name="tenant" defaultValue="Alex Miller" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 font-medium" />
                 </div>
                 <div>
-                  <label className="block text-slate-400 mb-1">Tenant Phone</label>
-                  <input required name="phone" defaultValue="(214) 555-0922" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white" />
+                  <label className="block text-slate-700 font-semibold mb-1">Tenant Phone</label>
+                  <input required name="phone" defaultValue="(214) 555-0922" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 font-medium" />
                 </div>
               </div>
               <div>
-                <label className="block text-slate-400 mb-1">Issue Description</label>
-                <textarea required name="issue" rows={2} defaultValue="AC unit in master bedroom is blowing warm air." className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white" />
+                <label className="block text-slate-700 font-semibold mb-1">Issue Description</label>
+                <textarea required name="issue" rows={2} defaultValue="AC unit in master bedroom is blowing warm air." className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 font-medium" />
               </div>
               <div>
-                <label className="block text-slate-400 mb-1">Initial Severity</label>
-                <select name="severity" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-white">
+                <label className="block text-slate-700 font-semibold mb-1">Initial Severity</label>
+                <select name="severity" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 font-medium">
                   <option value="emergency">Emergency (24/7 Auto-Dispatch)</option>
                   <option value="high">High Priority</option>
                   <option value="medium">Medium</option>
@@ -487,11 +488,11 @@ export const MaintenanceDashboard: React.FC<MaintenanceDashboardProps> = ({
                 </select>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
-                <button type="button" onClick={() => setShowAddTicketModal(false)} className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
+                <button type="button" onClick={() => setShowAddTicketModal(false)} className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium">
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 rounded-lg bg-teal-600 text-slate-950 font-bold">
+                <button type="submit" className="px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold">
                   Create Work Order
                 </button>
               </div>

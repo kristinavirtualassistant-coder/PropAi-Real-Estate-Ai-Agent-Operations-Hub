@@ -1,19 +1,15 @@
 import express from "express";
-import http from "http";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, Type, ThinkingLevel, Modality } from "@google/genai";
-import { WebSocketServer } from "ws";
+import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
-const server = http.createServer(app);
 
-// Enable JSON body with higher limit for base64 audio
-app.use(express.json({ limit: "20mb" }));
+app.use(express.json());
 
 // Initialize Gemini Client
 const getGeminiClient = () => {
@@ -31,237 +27,7 @@ const getGeminiClient = () => {
   });
 };
 
-// --- WEBSOCKET FOR GEMINI LIVE API (gemini-3.1-flash-live-preview) ---
-const wss = new WebSocketServer({ server, path: "/live" });
-
-wss.on("connection", async (clientWs) => {
-  const ai = getGeminiClient();
-  if (!ai) {
-    clientWs.send(JSON.stringify({ error: "Gemini API key is missing." }));
-    return;
-  }
-
-  try {
-    const session = await ai.live.connect({
-      model: "gemini-3.1-flash-live-preview",
-      config: {
-        responseModalities: [Modality.AUDIO],
-        speechConfig: {
-          voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
-        },
-        systemInstruction: "You are PropAI Live Voice Assistant. You help real estate wholesalers and property managers with live voice conversations, deal qualification, and maintenance triage.",
-      },
-      callbacks: {
-        onmessage: (message: any) => {
-          const audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
-          if (audio) {
-            clientWs.send(JSON.stringify({ audio }));
-          }
-          if (message.serverContent?.interrupted) {
-            clientWs.send(JSON.stringify({ interrupted: true }));
-          }
-        },
-      },
-    });
-
-    clientWs.on("message", (data) => {
-      try {
-        const parsed = JSON.parse(data.toString());
-        if (parsed.audio) {
-          session.sendRealtimeInput({
-            audio: { data: parsed.audio, mimeType: "audio/pcm;rate=16000" },
-          });
-        } else if (parsed.text) {
-          session.sendRealtimeInput({
-            text: parsed.text,
-          });
-        }
-      } catch (e) {
-        console.error("WebSocket payload error:", e);
-      }
-    });
-
-    clientWs.on("close", () => {
-      try {
-        session.close();
-      } catch (e) {}
-    });
-  } catch (err: any) {
-    console.error("Live connection error:", err);
-    clientWs.send(JSON.stringify({ error: err.message || "Failed to start Live session" }));
-  }
-});
-
-// In-Memory Activity Telemetry Logs Storage
-interface ActivityLogItem {
-  id: string;
-  timestamp: string;
-  service: string;
-  endpoint: string;
-  method: string;
-  status: string;
-  latencyMs: number;
-  requestPayload: any;
-  responsePayload: any;
-  headers?: Record<string, string>;
-  modelUsed?: string;
-  notes?: string;
-}
-
-const serverActivityLogs: ActivityLogItem[] = [];
-
-const recordLog = (entry: Omit<ActivityLogItem, "id" | "timestamp">) => {
-  const log: ActivityLogItem = {
-    id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-    timestamp: new Date().toISOString(),
-    ...entry,
-  };
-  serverActivityLogs.unshift(log);
-  // Keep last 100 entries
-  if (serverActivityLogs.length > 100) {
-    serverActivityLogs.pop();
-  }
-  return log;
-};
-
-// Seed initial system boot log
-recordLog({
-  service: "Gemini 3.6 Flash",
-  endpoint: "/api/health",
-  method: "GET",
-  status: "200 OK",
-  latencyMs: 12,
-  requestPayload: { check: "system_boot" },
-  responsePayload: { status: "ok", geminiAvailable: true },
-  modelUsed: "gemini-3.6-flash",
-  notes: "PropAI server telemetry initialized successfully."
-});
-
 // --- API ENDPOINTS ---
-
-// Activity Logs Endpoint
-app.get("/api/activity-logs", (req, res) => {
-  res.json({ logs: serverActivityLogs });
-});
-
-app.delete("/api/activity-logs", (req, res) => {
-  serverActivityLogs.length = 0;
-  res.json({ success: true, message: "Activity logs cleared" });
-});
-
-// Vapi Telephony Webhook Endpoint
-app.post("/api/vapi/webhook", async (req, res) => {
-  const startTime = performance.now();
-  const vapiPayload = req.body;
-  const ai = getGeminiClient();
-
-  const userMessage = vapiPayload?.message?.functionCall?.parameters?.userMessage || 
-                     vapiPayload?.message?.transcript || 
-                     vapiPayload?.call?.transcript || 
-                     "Hello, I got your call about selling my property.";
-
-  let replyText = "";
-  let modelUsed = "gemini-3.6-flash";
-
-  if (ai) {
-    try {
-      const response = await ai.models.generateContent({
-        model: modelUsed,
-        contents: `Vapi Telephony Call Inbound Payload:\n${JSON.stringify(vapiPayload)}\n\nUser Spoken Text: "${userMessage}"\n\nGenerate an immediate 1-2 sentence conversational voice reply for the real estate lead or tenant call.`,
-        config: {
-          systemInstruction: "You are a real-time conversational voice agent handling inbound calls for real estate wholesaling and 24/7 property maintenance."
-        }
-      });
-      replyText = response.text?.trim() || "Thanks for calling PropAI! How can I assist you with your property today?";
-    } catch (e: any) {
-      replyText = "Thank you for reaching out! A representative will connect with you shortly.";
-    }
-  } else {
-    replyText = "Hello! Thanks for calling about 123 Main St. Are you looking for a quick cash closing or a traditional sale?";
-  }
-
-  const duration = Math.round(performance.now() - startTime);
-  const responseData = {
-    results: [
-      {
-        toolCallId: vapiPayload?.message?.functionCall?.id || "call_fn_001",
-        result: replyText
-      }
-    ],
-    assistantResponse: replyText,
-    vapiStatus: "processed",
-    llmPayloadDelivered: true
-  };
-
-  recordLog({
-    service: "Vapi Telephony",
-    endpoint: "/api/vapi/webhook",
-    method: "POST",
-    status: "200 OK",
-    latencyMs: duration,
-    requestPayload: vapiPayload,
-    responsePayload: responseData,
-    modelUsed,
-    notes: `Vapi call webhook processed. Payload delivered to ${modelUsed}.`
-  });
-
-  res.json(responseData);
-});
-
-// Retell AI Telephony Webhook Endpoint
-app.post("/api/retell/webhook", async (req, res) => {
-  const startTime = performance.now();
-  const retellPayload = req.body;
-  const ai = getGeminiClient();
-
-  const userSpeech = retellPayload?.args?.user_prompt || 
-                     retellPayload?.transcript || 
-                     retellPayload?.event?.data?.transcript || 
-                     "I need an emergency plumber at unit 4B right away.";
-
-  let responseContent = "";
-  let modelUsed = "gemini-3.6-flash";
-
-  if (ai) {
-    try {
-      const response = await ai.models.generateContent({
-        model: modelUsed,
-        contents: `Retell AI Telephony Event Payload:\n${JSON.stringify(retellPayload)}\n\nSpoken Speech: "${userSpeech}"\n\nProvide an immediate, natural 1-2 sentence response.`,
-        config: {
-          systemInstruction: "You are a Retell AI voice handler powered by Gemini LLM."
-        }
-      });
-      responseContent = response.text?.trim() || "I have received your request and am dispatching an emergency contractor now.";
-    } catch (e: any) {
-      responseContent = "Understood. Our maintenance coordinator is on it.";
-    }
-  } else {
-    responseContent = "I've logged your emergency request for unit 4B and contacted FastFlow Plumbing.";
-  }
-
-  const duration = Math.round(performance.now() - startTime);
-  const responseData = {
-    response_id: `retell-resp-${Date.now()}`,
-    content: responseContent,
-    status: "success",
-    telephonyEngine: "Retell AI",
-    llmGrounding: "Gemini 3.6 Flash"
-  };
-
-  recordLog({
-    service: "Retell AI",
-    endpoint: "/api/retell/webhook",
-    method: "POST",
-    status: "200 OK",
-    latencyMs: duration,
-    requestPayload: retellPayload,
-    responsePayload: responseData,
-    modelUsed,
-    notes: `Retell AI webhook processed. Payload verified reaching LLM.`
-  });
-
-  res.json(responseData);
-});
 
 // Health Check
 app.get("/api/health", (req, res) => {
@@ -531,108 +297,170 @@ app.post("/api/agent/tts", async (req, res) => {
 });
 
 // Multi-turn Gemini Chatbot Endpoint
-app.post("/api/chat", async (req, res) => {
+app.post("/api/gemini/chat", async (req, res) => {
   try {
-    const { messages, model, systemInstruction } = req.body;
+    const { messages, systemInstruction, modelOverride } = req.body;
     const ai = getGeminiClient();
-
-    let selectedModel = "gemini-3.5-flash";
-    if (model === "pro" || model === "gemini-3.1-pro-preview") {
-      selectedModel = "gemini-3.1-pro-preview";
-    } else if (model === "lite" || model === "gemini-3.1-flash-lite") {
-      selectedModel = "gemini-3.1-flash-lite";
-    }
-
     if (!ai) {
       return res.json({
-        reply: "Hello! I am your PropAI Deal & Property Assistant. I can help you underwrite wholesaling deals, structure novation agreements, handle tough seller objections, or draft contractor dispatch protocols. What would you like to work on today?"
+        reply: "I am your AI Real Estate Assistant. Gemini API key is currently in simulation mode. Ask me anything about property valuations, tenant scripts, or deal underwriting!"
       });
     }
 
-    const chat = ai.chats.create({
-      model: selectedModel,
+    const modelToUse = modelOverride || "gemini-3.5-flash";
+    const contents = (messages || []).map((m: any) => ({
+      role: m.role === 'user' ? 'user' : 'model',
+      parts: [{ text: m.text }]
+    }));
+
+    const response = await ai.models.generateContent({
+      model: modelToUse,
+      contents,
       config: {
-        systemInstruction: systemInstruction || "You are PropAI Chatbot, an expert advisor for real estate wholesalers and property managers.",
-      },
+        systemInstruction: systemInstruction || "You are an expert Real Estate & Property Management AI Assistant. Provide helpful, concise, and professional answers."
+      }
     });
 
-    const previousMessages = messages ? messages.slice(0, messages.length - 1) : [];
-    const lastMessage = messages && messages.length > 0 ? messages[messages.length - 1]?.text || "Hello" : "Hello";
-
-    for (const msg of previousMessages) {
-      if (msg.role === "user") {
-        await chat.sendMessage({ message: msg.text });
-      }
-    }
-
-    const response = await chat.sendMessage({ message: lastMessage });
-    res.json({ reply: response.text || "" });
+    res.json({ reply: response.text || "No response generated." });
   } catch (error: any) {
-    console.error("Chatbot API Error:", error);
-    res.status(500).json({ error: error.message || "Failed chat request" });
+    console.error("Chat API Error:", error);
+    res.status(500).json({ error: error.message || "Failed to process chat message" });
   }
 });
 
-// Deep Analysis (High Thinking Mode via gemini-3.1-pro-preview)
-app.post("/api/deep-analysis", async (req, res) => {
+// Google Search Grounding Endpoint (gemini-3.5-flash with googleSearch)
+app.post("/api/gemini/search", async (req, res) => {
   try {
-    const { prompt, context } = req.body;
+    const { query } = req.body;
     const ai = getGeminiClient();
     if (!ai) {
       return res.json({
-        analysis: "Deep Underwriting & Liability Analysis: High property damage risk detected. Ensure immediate water main shutoff valve inspection, verify property title liens, and require signed contractor SLA before approving work orders.",
+        reply: `[Search Grounding Simulation] Current real estate trends for "${query}": Interest rates are fluctuating around 6.5%, real estate wholesaling inventory remains strong, and property management vacancy rates are under 4.8%.`,
+        sources: [{ title: "MLS Real Estate Data 2026", url: "https://realestate.example.com" }]
       });
     }
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
-      contents: `Perform an in-depth, high-level reasoning analysis for this real estate scenario:\n\nContext:\n${JSON.stringify(context || {})}\n\nQuery/Prompt:\n${prompt}`,
+      model: "gemini-3.5-flash",
+      contents: `Search Google for up to date real estate, mortgage rate, or market data for: ${query}. Summarize key actionable insights for property investors or managers.`,
       config: {
-        thinkingConfig: {
-          thinkingLevel: ThinkingLevel.HIGH,
-        },
-        systemInstruction: "You are a senior real estate risk analyst, deal underwriter, and legal compliance expert. Provide an exhaustive, multi-step reasoning analysis.",
-      },
+        tools: [{ googleSearch: {} }]
+      }
     });
 
-    res.json({ analysis: response.text || "" });
+    const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    const sources = groundingChunks.map((chunk: any) => ({
+      title: chunk.web?.title || "Search Source",
+      url: chunk.web?.uri || "#"
+    }));
+
+    res.json({
+      reply: response.text || "No response found.",
+      sources
+    });
   } catch (error: any) {
-    console.error("Deep Analysis Error:", error);
-    res.status(500).json({ error: error.message || "Failed to run deep thinking analysis" });
+    console.error("Search Grounding Error:", error);
+    res.status(500).json({ error: error.message || "Search grounding failed" });
   }
 });
 
-// Low Latency Fast Response Endpoint (gemini-3.1-flash-lite)
-app.post("/api/fast-response", async (req, res) => {
+// Google Maps Grounding Endpoint (gemini-3.5-flash with googleMaps)
+app.post("/api/gemini/maps", async (req, res) => {
   try {
-    const { prompt, systemPrompt } = req.body;
+    const { location, query } = req.body;
     const ai = getGeminiClient();
     if (!ai) {
-      return res.json({ reply: "Got it! Thanks for reaching out. Let me update your record right away." });
+      return res.json({
+        reply: `[Maps Grounding Simulation] Location lookup for "${location || query}": Located in a high-demand rental corridor with nearby schools, transit lines, and local trade contractors.`,
+        places: [{ name: "Target Property Zone", address: location || "123 Main St" }]
+      });
+    }
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: `Look up location data, nearby amenities, school districts, or contractor services for property at ${location || query}. ${query || ''}`,
+      config: {
+        tools: [{ googleMaps: {} }]
+      }
+    });
+
+    res.json({ reply: response.text || "No map details returned." });
+  } catch (error: any) {
+    console.error("Maps Grounding Error:", error);
+    res.status(500).json({ error: error.message || "Maps grounding failed" });
+  }
+});
+
+// Low-Latency Endpoint (gemini-3.1-flash-lite)
+app.post("/api/gemini/fast-response", async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    const ai = getGeminiClient();
+    if (!ai) {
+      return res.json({ reply: `[Fast Lite Response]: ${prompt || 'Ready'}` });
     }
 
     const response = await ai.models.generateContent({
       model: "gemini-3.1-flash-lite",
-      contents: prompt,
-      config: {
-        systemInstruction: systemPrompt || "Provide ultra-fast, concise 1-sentence real estate assistant responses.",
-      },
+      contents: prompt || "Quick response test"
     });
 
     res.json({ reply: response.text || "" });
   } catch (error: any) {
-    console.error("Fast Response Error:", error);
-    res.status(500).json({ error: error.message || "Failed to generate fast response" });
+    console.error("Lite API Error:", error);
+    res.status(500).json({ error: error.message || "Fast response failed" });
+  }
+});
+
+// High Thinking Mode Endpoint (gemini-3.1-pro-preview with thinkingLevel: HIGH)
+app.post("/api/gemini/think", async (req, res) => {
+  try {
+    const { dealDetails } = req.body;
+    const ai = getGeminiClient();
+    if (!ai) {
+      return res.json({
+        reply: `[High Thinking Underwriting Analysis]
+1. Maximum Allowable Offer (MAO): $182,500 based on $280,000 ARV, $35,000 Rehab, and 15% Wholesale assignment fee ($15,000).
+2. Risk Analysis: High contractor labor costs in current market. Recommend buffer of $5,000.
+3. Exit Strategies:
+   - Strategy A: Quick Wholesale Flip to Cash Buyer ($15,000 assignment profit)
+   - Strategy B: BRRRR Long-Term Rental ($1,850/mo rent, 8.2% Cap Rate)`
+      });
+    }
+
+    const promptText = `Perform deep multi-step mathematical underwriting, deal analysis, and risk assessment for this real estate scenario:
+${JSON.stringify(dealDetails || { property: "742 Evergreen Terr", arv: 280000, rehabEst: 35000, asking: 160000 })}
+
+Include:
+1. Maximum Allowable Offer (MAO) breakdown
+2. Detailed risk & contingency calculation
+3. Dual exit strategies (Wholesale flip vs Buy & Hold BRRRR Cap Rate analysis)
+4. Recommended negotiation leverage points`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.1-pro-preview",
+      contents: promptText,
+      config: {
+        thinkingConfig: {
+          thinkingLevel: "HIGH" as any
+        }
+      }
+    });
+
+    res.json({ reply: response.text || "Analysis complete." });
+  } catch (error: any) {
+    console.error("Thinking Mode Error:", error);
+    res.status(500).json({ error: error.message || "Deep thinking analysis failed" });
   }
 });
 
 // Audio Transcription Endpoint (gemini-3.5-flash)
-app.post("/api/transcribe", async (req, res) => {
+app.post("/api/gemini/transcribe", async (req, res) => {
   try {
     const { audioBase64, mimeType } = req.body;
     const ai = getGeminiClient();
     if (!ai) {
-      return res.json({ text: "Emergency AC unit leakage reported in master bathroom." });
+      return res.json({ transcript: "Transcribed audio message: 'Hi, my air conditioner is leaking water in unit 4B, please send a plumber right away!'" });
     }
 
     const response = await ai.models.generateContent({
@@ -640,94 +468,21 @@ app.post("/api/transcribe", async (req, res) => {
       contents: [
         {
           inlineData: {
-            mimeType: mimeType || "audio/wav",
-            data: audioBase64,
-          },
+            mimeType: mimeType || "audio/webm",
+            data: audioBase64
+          }
         },
-        { text: "Accurately transcribe this spoken audio into clear text. Return only the transcription without commentary." },
-      ],
+        { text: "Transcribe the spoken audio verbatim and summarize any actionable requests or property details mentioned." }
+      ]
     });
 
-    res.json({ text: response.text?.trim() || "" });
+    res.json({ transcript: response.text || "No speech recognized." });
   } catch (error: any) {
-    console.error("Transcription Error:", error);
+    console.error("Transcription API Error:", error);
     res.status(500).json({ error: error.message || "Failed to transcribe audio" });
   }
 });
 
-// Google Search Grounding Endpoint (gemini-3.5-flash)
-app.post("/api/search-grounding", async (req, res) => {
-  try {
-    const { query } = req.body;
-    const ai = getGeminiClient();
-    if (!ai) {
-      return res.json({
-        text: `Search Grounding for "${query}": Current median sales price in this target zip code is $315,000 with an average 24 days on market. Off-market wholesaler discounts range from 65-72% ARV.`,
-        groundingSources: [{ title: "Zillow Housing Market Trends", uri: "https://www.zillow.com/research/data/" }]
-      });
-    }
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: query,
-      config: {
-        tools: [{ googleSearch: {} }],
-        systemInstruction: "Provide up-to-date real estate market intelligence, property records, and comp research using Google Search data."
-      },
-    });
-
-    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
-    const groundingSources = chunks.map((c: any) => ({
-      title: c.web?.title || "Web Source",
-      uri: c.web?.uri || "#"
-    })).filter((s: any) => s.uri !== "#");
-
-    res.json({
-      text: response.text || "",
-      groundingSources,
-    });
-  } catch (error: any) {
-    console.error("Search Grounding Error:", error);
-    res.status(500).json({ error: error.message || "Failed to search grounding" });
-  }
-});
-
-// Google Maps Grounding Endpoint (gemini-3.5-flash)
-app.post("/api/maps-grounding", async (req, res) => {
-  try {
-    const { locationQuery } = req.body;
-    const ai = getGeminiClient();
-    if (!ai) {
-      return res.json({
-        text: `Map analysis for "${locationQuery}": Located in a high-demand suburban neighborhood with proximity to major highways, nearby hardware suppliers (Home Depot 1.2mi), and emergency plumbing contractors within 5 miles.`,
-        mapsSources: [{ title: "Google Maps Location", uri: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationQuery)}` }]
-      });
-    }
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: `Find address details, neighborhood safety, and nearby contractor supply stores for: ${locationQuery}`,
-      config: {
-        tools: [{ googleMaps: {} }],
-        systemInstruction: "You are a real estate geographic and local contractor logistics specialist. Use Google Maps to verify address details, surrounding amenities, and contractor coverage."
-      },
-    });
-
-    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
-    const mapsSources = chunks.map((c: any) => ({
-      title: c.maps?.title || c.web?.title || "Google Maps Location",
-      uri: c.maps?.uri || c.web?.uri || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationQuery)}`
-    }));
-
-    res.json({
-      text: response.text || "",
-      mapsSources,
-    });
-  } catch (error: any) {
-    console.error("Maps Grounding Error:", error);
-    res.status(500).json({ error: error.message || "Failed maps grounding" });
-  }
-});
 
 // Vite middleware for dev / express static for prod
 async function startServer() {
@@ -745,7 +500,7 @@ async function startServer() {
     });
   }
 
-  server.listen(PORT, "0.0.0.0", () => {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`PropAI Agent Server running on http://0.0.0.0:${PORT}`);
   });
 }

@@ -1,4 +1,4 @@
-import { WholesalerLead, MaintenanceTicket, PreferredContractor, AgentConfig, CampaignStats, PropertyManagerStats } from '../types';
+import { WholesalerLead, MaintenanceTicket, PreferredContractor, AgentConfig, CampaignStats, PropertyManagerStats, BrandConfig, NicheModule, FeatureRequestItem, NicheBuildRequestItem } from '../types';
 
 export const INITIAL_WHOLESALER_LEADS: WholesalerLead[] = [
   {
@@ -16,6 +16,7 @@ export const INITIAL_WHOLESALER_LEADS: WholesalerLead[] = [
     lastContactDate: '10 mins ago',
     notes: 'Out-of-state landlord behind on property taxes ($8.4k). Wants quick cash sale without repairs.',
     scheduledCallDate: 'Today at 4:30 PM',
+    isPriorityOverride: true,
     conversation: [
       { id: 'm1', sender: 'ai', text: "Hey Robert! I noticed your property at 1428 Elm St in Dallas. Are you open to a cash offer with zero closing costs?", timestamp: '10:14 AM' },
       { id: 'm2', sender: 'seller', text: "Who is this? How much are you offering? It needs work.", timestamp: '10:16 AM' },
@@ -244,3 +245,177 @@ export const INITIAL_PM_STATS: PropertyManagerStats = {
   tenantSatisfactionScore: 4.9,
   estimatedHoursSavedMonthly: 145
 };
+
+export const DEFAULT_BRAND_CONFIG: BrandConfig = {
+  companyName: 'PropAI Operations Hub',
+  tagline: 'Autonomous Real Estate & Operations Agents',
+  primaryColor: 'indigo',
+  logoIcon: 'bot',
+  customDomain: 'ops.propai.io',
+  customLogoUrl: '',
+  agentPhoneName: 'PropAI AI Assistant',
+  whiteLabelEnabled: true,
+  watermarkText: 'Powered by PropAI Autonomous Engine',
+  phoneDisplayNumber: '+1 (888) 593-PROP',
+  smsSignature: 'Sent via PropAI Automated Desk'
+};
+
+export const INITIAL_NICHE_MODULES: NicheModule[] = [
+  {
+    id: 'property_manager',
+    pageNumber: 1,
+    name: 'Property Managers & Landlords',
+    badge: '24/7 Tenant Maintenance',
+    description: 'Autonomous voice & SMS agent handling tenant emergency intake, diagnostic troubleshooting, and auto-dispatching HVAC/Plumbing contractors.',
+    iconName: 'wrench',
+    colorTheme: 'emerald',
+    stats: [
+      { label: 'Units Managed', value: '240', detail: 'Across 18 Multifamily & Single Family Properties' },
+      { label: 'Avg Triage Time', value: '1.2 min', detail: 'Instant AI Tenant Diagnostics' },
+      { label: 'Saved Monthly', value: '145 hrs', detail: 'Eliminated 2:00 AM Landlord Calls' }
+    ],
+    sampleWorkflow: [
+      { step: '01', title: 'Inbound Tenant Call / Text', desc: 'Tenant calls at 2:15 AM regarding bursting pipe or broken AC unit.' },
+      { step: '02', title: 'AI Triage & Video Troubleshooting', desc: 'Agent assesses issue, checks main shut-off valve, gathers photos.' },
+      { step: '03', title: 'Contractor Auto-Dispatch', desc: 'Dispatches preferred plumber automatically with emergency SLA.' }
+    ],
+    voiceAgentPrompt: 'You are PropAI 24/7 Tenant Maintenance Coordinator. Handle tenant emergencies, diagnose root cause, and dispatch preferred contractors.'
+  },
+  {
+    id: 'wholesaler',
+    pageNumber: 2,
+    name: 'Real Estate Wholesalers & Investors',
+    badge: 'Off-Market Deal Engine',
+    description: 'AI Voice Cold Caller & Inbound Lead Setter that qualifies motivated distress sellers (Tax Delinquent, Probate, Pre-Foreclosure) and calculates MAO cash offers.',
+    iconName: 'building',
+    colorTheme: 'indigo',
+    stats: [
+      { label: 'Active Pipeline', value: '$112,000', detail: 'Estimated Assignment Fee Value' },
+      { label: 'Response Rate', value: '24.8%', detail: 'AI Multi-Touch Voice & SMS Outreach' },
+      { label: 'Under Contract', value: '6 Deals', detail: 'Average $18,500 Fee Per Closed Deal' }
+    ],
+    sampleWorkflow: [
+      { step: '01', title: 'Cold Call & Inbound Seller Voice', desc: 'Agent contacts distress list or answers inbound direct mail calls.' },
+      { step: '02', title: 'Motivated Seller Scoring', desc: 'Evaluates timeline, Asking Price, Repairs needed, and Motivation (1-10).' },
+      { step: '03', title: 'Automated Offer & Contract', desc: 'Calculates 70% ARV minus repairs and emails purchase agreement.' }
+    ],
+    voiceAgentPrompt: 'You are PropAI Acquisitions Specialist. Talk to property owners, determine seller motivation, gather repair details, and negotiate cash offers.'
+  },
+  {
+    id: 'real_estate_agent',
+    pageNumber: 3,
+    name: 'Real Estate Agents & Brokers',
+    badge: 'Buyer/Seller Lead Qualification',
+    description: 'Instant response AI assistant that answers Zillow/Realtor.com leads in 15 seconds, pre-qualifies mortgage readiness, and books showing tours directly on Google Calendar.',
+    iconName: 'home',
+    colorTheme: 'violet',
+    stats: [
+      { label: 'Lead Response Time', value: '14 sec', detail: 'Instant AI Voice Callback' },
+      { label: 'Pre-Approved Buyers', value: '42 Leads', detail: 'Budget & Pre-Approval Letter Verified' },
+      { label: 'Tours Booked', value: '28/mo', detail: 'Synced to Agent Calendar' }
+    ],
+    sampleWorkflow: [
+      { step: '01', title: 'Inbound Web / Portal Lead', desc: 'New lead submits inquiry on $650k suburban listing.' },
+      { step: '02', title: '15-Second AI Pre-Qualification', desc: 'Agent asks about pre-approval letter, timeline, and preferred neighborhoods.' },
+      { step: '03', title: 'Direct Showing Calendar Booking', desc: 'Schedules private walkthrough tour and sends SMS confirmation.' }
+    ],
+    voiceAgentPrompt: 'You are the Senior Listing Assistant for Apex Real Estate Group. Pre-qualify home buyers and sellers, verify mortgage pre-approval, and book showing tours.'
+  },
+  {
+    id: 'short_term_rental',
+    pageNumber: 4,
+    name: 'Short-Term Rental & Airbnb Hosts',
+    badge: 'Guest Concierge & Cleaning Dispatch',
+    description: '24/7 AI guest concierge answering Wi-Fi/lockbox questions, managing early check-ins, and auto-dispatching turnover cleaners between bookings.',
+    iconName: 'key',
+    colorTheme: 'cyan',
+    stats: [
+      { label: 'Active Listings', value: '38 Doors', detail: 'Airbnb, VRBO, & Direct Booking Engine' },
+      { label: 'Guest Response Time', value: '< 30 sec', detail: 'Instant Smart Lock & Amenities Help' },
+      { label: 'Cleaner Turnover SLA', value: '100%', detail: 'Automated Cleaner SMS Dispatch' }
+    ],
+    sampleWorkflow: [
+      { step: '01', title: 'Guest Inquiry / Emergency', desc: 'Guest texts/calls at 10 PM about smart lock code or hot tub heater.' },
+      { step: '02', title: 'Instant AI Concierge Answer', desc: 'Agent provides custom property guidebook answers and lockbox override codes.' },
+      { step: '03', title: 'Turnover Cleaner Dispatch', desc: 'Triggers SMS alert to cleaning crew upon guest checkout verification.' }
+    ],
+    voiceAgentPrompt: 'You are the AI Guest Concierge for Luxury Vacation Rentals. Answer guest questions, guide check-ins, and resolve stay issues.'
+  },
+  {
+    id: 'solar_sales',
+    pageNumber: 5,
+    name: 'Solar & Home Services Contractors',
+    badge: 'Utility Bill Qualifier & Setter',
+    description: 'Outbound setter & inbound qualifier that analyzes homeowners monthly electric bills, calculates shade/roof suitability, and books home solar consultations.',
+    iconName: 'sun',
+    colorTheme: 'amber',
+    stats: [
+      { label: 'Monthly Utility Audits', value: '180 Bills', detail: 'Uploaded & AI Parsed' },
+      { label: 'Qualifying Electric Bill', value: '>$150/mo', detail: 'High ROI Target Threshold' },
+      { label: 'Appointments Set', value: '52 Consults', detail: 'Door-to-Door & Web Inbound' }
+    ],
+    sampleWorkflow: [
+      { step: '01', title: 'Utility Bill Image Upload', desc: 'Homeowner texts photo of monthly electric bill.' },
+      { step: '02', title: 'Roof & Savings AI Audit', desc: 'Agent verifies roof orientation, current kWh rate, and calculates annual net savings.' },
+      { step: '03', title: 'In-Home Design Consultation', desc: 'Books solar consultant site visit directly with homeowner.' }
+    ],
+    voiceAgentPrompt: 'You are the Energy Specialist for SunPower Solutions. Qualify homeowners based on utility bill costs, roof condition, and schedule solar consultations.'
+  }
+];
+
+export const INITIAL_FEATURE_REQUESTS: FeatureRequestItem[] = [
+  {
+    id: 'fr-1',
+    title: 'Bi-directional Zapier & Make.com Webhook Sync',
+    category: 'Integration',
+    description: 'Trigger immediate webhook payloads when leads reach "Qualified" or "Under Contract" status to sync automatically with Podio, HubSpot, or HighLevel.',
+    votes: 42,
+    userVoted: false,
+    status: 'In Development',
+    createdAt: '3 days ago'
+  },
+  {
+    id: 'fr-2',
+    title: 'Custom SMS Auto-Responder Sequences',
+    category: 'Automation',
+    description: 'Allow multi-day automated follow-up SMS drips if an unmotivated seller or tenant does not reply within 48 hours.',
+    votes: 29,
+    userVoted: true,
+    status: 'Planned',
+    createdAt: '1 week ago'
+  },
+  {
+    id: 'fr-3',
+    title: 'Native Mobile App Push Notifications',
+    category: 'Mobile App',
+    description: 'Receive immediate push alerts on iOS/Android when a high-severity 2:00 AM emergency maintenance ticket is logged.',
+    votes: 18,
+    userVoted: false,
+    status: 'Under Review',
+    createdAt: '2 weeks ago'
+  },
+  {
+    id: 'fr-[#4]',
+    title: 'White-Label Agency Client Portal Permissions',
+    category: 'UI / Workflow',
+    description: 'Multi-tenant role permissions allowing sub-account agency clients to log in and only view their own specific property leads or tickets.',
+    votes: 35,
+    userVoted: false,
+    status: 'In Development',
+    createdAt: '5 days ago'
+  }
+];
+
+export const INITIAL_NICHE_BUILD_REQUESTS: NicheBuildRequestItem[] = [
+  {
+    id: 'nbr-1',
+    industryName: 'Roofing & Storm Damage Restoration',
+    targetAudience: 'Homeowners with recent hail/wind storm damage',
+    keyWorkflows: 'Outbound voice outreach after severe weather events, photo damage evaluation, insurance claim guidance',
+    specialRequirements: 'Integration with AccuLynx and Hover 3D models',
+    contactEmail: 'sales@roofpros.com',
+    status: 'Scoped',
+    submittedAt: 'Yesterday'
+  }
+];
+
