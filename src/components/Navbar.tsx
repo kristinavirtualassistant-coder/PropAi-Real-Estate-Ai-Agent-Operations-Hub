@@ -1,7 +1,6 @@
 import React from 'react';
 import { TargetNiche, BrandConfig, NicheModule } from '../types';
-import { Bot, PhoneCall, Building2, Wrench, Sparkles, DollarSign, Settings, Upload, Palette, Home, Shield, Zap, Key, Sun, Plus, Layers, Lightbulb, LogIn, LogOut, User as UserIcon, BrainCircuit } from 'lucide-react';
-import { User, loginWithGoogle, logoutUser } from '../lib/firebase';
+import { Bot, PhoneCall, Building2, Wrench, Sparkles, DollarSign, Settings, Upload, Palette, Home, Shield, Zap, Key, Sun, Plus, Layers, Lightbulb, BrainCircuit } from 'lucide-react';
 
 interface NavbarProps {
   activeNiche: TargetNiche;
@@ -17,7 +16,6 @@ interface NavbarProps {
   onOpenGeminiDrawer: () => void;
   brandConfig: BrandConfig;
   geminiConnected: boolean;
-  currentUser: User | null;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -34,7 +32,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenGeminiDrawer,
   brandConfig,
   geminiConnected,
-  currentUser
 }) => {
   const renderBrandIcon = () => {
     switch (brandConfig.logoIcon) {
@@ -161,43 +158,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               <DollarSign className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Pricing & ROI</span>
             </button>
-
-            {/* Firebase Auth Google Sign In Button */}
-            {currentUser ? (
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                {currentUser.photoURL ? (
-                  <img src={currentUser.photoURL} alt={currentUser.displayName || 'User'} className="w-7 h-7 rounded-full border border-slate-300 object-cover" />
-                ) : (
-                  <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center border border-indigo-200">
-                    {currentUser.displayName ? currentUser.displayName[0] : 'U'}
-                  </div>
-                )}
-                <div className="hidden xl:block text-left">
-                  <div className="text-[11px] font-bold text-slate-900 leading-none truncate max-w-[100px]">
-                    {currentUser.displayName || 'Account Owner'}
-                  </div>
-                  <span className="text-[9px] text-emerald-600 font-bold block">
-                    Cloud Synced
-                  </span>
-                </div>
-                <button
-                  onClick={logoutUser}
-                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 text-xs transition-colors"
-                  title="Sign Out of Firebase Account"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={loginWithGoogle}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all shadow-sm"
-                title="Sign in with Google via Firebase Auth"
-              >
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-3.5 h-3.5" alt="Google" />
-                <span className="hidden md:inline">Sign In</span>
-              </button>
-            )}
 
           </div>
 
