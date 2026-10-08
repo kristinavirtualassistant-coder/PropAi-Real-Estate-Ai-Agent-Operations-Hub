@@ -25,12 +25,8 @@ import { BrandModal } from './components/BrandModal';
 import { AddNicheModal } from './components/AddNicheModal';
 import { FeatureRequestModal } from './components/FeatureRequestModal';
 import { GeminiIntelligenceDrawer } from './components/GeminiIntelligenceDrawer';
-import { auth, onAuthStateChanged, User } from './lib/firebase';
 
 export default function App() {
-  // Firebase User Auth State
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
   // Page 1: Property Managers, Page 2: Wholesalers, etc.
   const [activeNiche, setActiveNiche] = useState<TargetNiche>('property_manager');
   const [nicheModules, setNicheModules] = useState<NicheModule[]>(INITIAL_NICHE_MODULES);
@@ -62,14 +58,6 @@ export default function App() {
   const [isGeminiDrawerOpen, setIsGeminiDrawerOpen] = useState<boolean>(false);
   const [geminiConnected, setGeminiConnected] = useState<boolean>(true);
   const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
-
-  // Listen for Firebase Auth state changes
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return () => unsubscribe();
-  }, []);
 
   // Selected items for Studio
   const [selectedLeadForSim, setSelectedLeadForSim] = useState<WholesalerLead | null>(leads[0] || null);
@@ -238,7 +226,6 @@ export default function App() {
         onOpenGeminiDrawer={() => setIsGeminiDrawerOpen(true)}
         brandConfig={brandConfig}
         geminiConnected={geminiConnected}
-        currentUser={currentUser}
       />
 
       {/* Main Workspace Canvas */}
